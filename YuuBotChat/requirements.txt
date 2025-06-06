@@ -1,0 +1,8 @@
+langchain
+langchain_google_genai
+langgraph
+streamlit
+requests
+beautifulsoup4
+datetime
+pytz

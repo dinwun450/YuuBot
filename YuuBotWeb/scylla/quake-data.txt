@@ -1,0 +1,11 @@
+
+CREATE KEYSPACE earthquakes WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy','DC1' : 3};
+
+USE earthquakes;
+
+CREATE TABLE earthquake_data (
+date text,
+epicenter text, 
+magnitude text, 
+shindo text,
+PRIMARY KEY((date, epicenter, magnitude, shindo)));

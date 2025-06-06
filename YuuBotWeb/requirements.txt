@@ -1,0 +1,6 @@
+cassandra-driver==3.29.2
+requests==2.31.0
+beautifulsoup4==4.12.2
+flask==2.2.5
+datetime==4.7.0
+pytz==2023.3

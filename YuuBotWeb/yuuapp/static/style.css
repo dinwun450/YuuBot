@@ -1,0 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Noto Sans JP', sans-serif;
+}
+
+#navbar {
+    background-color: #446a43;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    float:left;
+    width: 25%;
+    height: 100vh;
+}
+
+#navbar h1 {
+    font-size: 2.5em;
+    text-align: left;
+}
+
+.tablinks {
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    text-align: left;
+    border-radius: 10px;
+}
+
+.tablinks:hover {
+    background-color: #5a8a5a;
+    cursor: pointer;
+}
+
+#navbar a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.2em;
+}
+
+.window {
+    width: 75%;
+    height: 100vh;
+    padding: 20px;
+    float: right;
+}
+
+h2 {
+    font-size: 2em;
+    margin: 20px 0;
+}
+
+.table_fix_head { 
+    overflow: auto; 
+    height: 550px; 
+}
+
+.table_fix_head thead th { 
+    position: sticky; 
+    top: 0; 
+    z-index: 1; 
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 4px;
+    text-align: center;
+    border-bottom: 1px solid #000;
+}
+
+th {
+    background-color: #446a43;
+    color: white;
+    font-weight: bold;
+}
+
+td img {
+    width: 200px;
+    height: fit-content;
+}
+
+#refresh {
+    background-color: #446a43;
+    margin-top: 10px;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    border-radius: 10px;
+}
+
+#refresh:hover {
+    background-color: #5a8a5a;
+}
+
+.promptandbutton {
+    width: 100%;
+}
+
+input {
+    width: 74.5%;
+    padding: 5px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+button {
+    background-color: #446a43;
+    width: 25%;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    border-radius: 10px;
+}
+
+#output {
+    width: 100%;
+    height: 300px;
+    overflow-y: auto;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 5px;
+}
