@@ -1,0 +1,39 @@
+services:
+
+  scylla-node-one:
+    container_name: scylla-node-one
+    image: scylladb/scylla-enterprise:latest
+    restart: always
+    command: --seeds=scylla-node-one,scylla-node-two --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    volumes:
+      - "./scylla/scylla.yaml:/etc/scylla/scylla.yaml"
+      - "./scylla/cassandra-rackdc.properties.dc1:/etc/scylla/cassandra-rackdc.properties"
+      - "./scylla/quake-data.txt:/quake-data.txt"
+    networks:
+      web:
+
+  scylla-node-two:
+    container_name: scylla-node-two
+    image: scylladb/scylla-enterprise:latest
+    restart: always
+    command: --seeds=scylla-node-one,scylla-node-two --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    volumes:
+      - "./scylla/scylla.yaml:/etc/scylla/scylla.yaml"
+      - "./scylla/cassandra-rackdc.properties.dc1:/etc/scylla/cassandra-rackdc.properties"
+    networks:
+      web:
+
+  scylla-node-mari:
+    container_name: scylla-node-three
+    image: scylladb/scylla-enterprise:latest
+    restart: always
+    command: --seeds=scylla-node-one,scylla-node-two --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    volumes:
+      - "./scylla/scylla.yaml:/etc/scylla/scylla.yaml"
+      - "./scylla/cassandra-rackdc.properties.dc1:/etc/scylla/cassandra-rackdc.properties"
+    networks:
+      web:
+
+networks:
+  web:
+    driver: bridge
