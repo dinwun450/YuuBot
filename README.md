@@ -35,4 +35,4 @@ YuuBot is a comprehensive earthquake monitoring system for Japan. It consists of
 The application is containerized for easy deployment. To start the systems in the Chat and Web sections, use Docker Compose. For more information, check out the ReadME files in the Chat and Web directories.
 
 ## Note
-YuuBot Chat requires a Google API key for the Gemini AI model integration. YuuBot is under development, meaning that some missing features will be released soon.
+YuuBot Chat requires a Google API key for the Gemini AI model integration. Gemini LLMs may hallucinate at any time. YuuBot is under development, meaning that some missing features will be released soon.
