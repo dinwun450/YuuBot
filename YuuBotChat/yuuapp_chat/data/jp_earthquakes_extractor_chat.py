@@ -29,12 +29,13 @@ def get_earthquake_data():
         d["date"] = date
         d["time"] = time
         d["epicenter"] = quake_info[c][1].text
+        d["mag"] = quake_info[c][2].text
 
         if d["mag"] == "---":
-            d["mag"] = None
+            d["mag"] = float('nan')
         else:
             d["mag"] = float(quake_info[c][2].text)
-            
+
         d["intensity"] = quake_info[c][3].text
         
         if d["intensity"] == "---":
