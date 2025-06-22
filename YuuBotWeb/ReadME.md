@@ -36,7 +36,7 @@
    Where `<any name>` represents the name of the build you're about to create.
 4. Run your build with:
    ```
-   docker run -d --net=yuubot_web -p 4092:4092 --name <any container name> <build name> yuubot_app.py
+   docker run -d --net=yuubotweb_web -p 4092:4092 --name <any container name> <build name> yuubot_app.py
    ```
    Where `<any container name>` represents the name of the container you're running, and `<build name>` indicates the build you have created in step four.
 5. View your running app in localhost:4092.
