@@ -1,5 +1,7 @@
 # YuuBot
 
+![](https://img.shields.io/badge/version-1.2.1-green) ![GitHub last commit](https://img.shields.io/github/last-commit/dinwun450/YuuBot) ![GitHub Repo stars](https://img.shields.io/github/stars/dinwun450/YuuBot)
+
 ## Overview
 YuuBot is a comprehensive earthquake monitoring system for Japan and globally. It consists of two integrated components: a real-time earthquake data visualization web application and an AI-powered chatbot interface. The system continuously tracks, stores, presents, and forecasts earthquake data from Japan and other parts of the world, making critical seismic information accessible through visual dashboards and natural language interactions.
 
@@ -37,3 +39,7 @@ The application is containerized for easy deployment. To start the systems in th
 
 ## Note
 YuuBot Chat (Legacy) requires a Google API key for the Gemini AI model integration. Gemini LLMs may hallucinate at any time. As of v.1.2.1 for YuuBot Web and Chat, a Snowflake account is required while a W&B account is strongly recommended. YuuBot is under development, meaning that some missing features will be released soon. YuuBot Chat v.1.2.1 instructions will be posted soon.
+
+## My Socials
+[![Static Badge](https://img.shields.io/badge/Instagram-magenta?logo=instagram&logoColor=white)](https://www.instagram.com/dinwun450/) [![LinkedIn](https://custom-icon-badges.demolab.com/badge/LinkedIn-0A66C2?logo=linkedin-white&logoColor=fff)](https://www.linkedin.com/in/dinowun) [![Facebook](https://img.shields.io/badge/Facebook-%231877F2.svg?logo=Facebook&logoColor=white)](https://www.facebook.com/dino.wun.5)
+
