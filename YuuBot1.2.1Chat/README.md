@@ -270,6 +270,8 @@ Once the application is running, you can ask questions like:
 
 5. **Cross-region inference**
    - If your region doesn't support the required models, enable [cross-region inference](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cross-region-inference/)
+6. **Network Policy is Required**
+   - Go to Goverance and Security -> Network Policy -> "+ Network Policy" -> Add Name (and description since it's optional) -> "+ Create Rule" -> Create. Activate it afterwards.
 
 ## Architecture
 
