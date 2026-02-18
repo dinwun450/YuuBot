@@ -1,4 +1,8 @@
-# YuuBot
+<p align="center">
+  <img src="https://github.com/dinwun450/YuuBot/blob/main/YuuBot.png" alt="Description">
+</p>
+
+---
 
 ![](https://img.shields.io/badge/version-1.2.1-green) ![GitHub last commit](https://img.shields.io/github/last-commit/dinwun450/YuuBot) ![GitHub Repo stars](https://img.shields.io/github/stars/dinwun450/YuuBot)
 
