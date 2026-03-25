@@ -270,8 +270,12 @@ Once the application is running, you can ask questions like:
 
 5. **Cross-region inference**
    - If your region doesn't support the required models, enable [cross-region inference](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cross-region-inference/)
+  
 6. **Network Policy is Required**
    - Go to Goverance and Security -> Network Policy -> "+ Network Policy" -> Add Name (and description since it's optional) -> "+ Create Rule" -> Create. Activate it afterwards.
+
+7. **"Error: Access denied to trial accounts"**
+   - As of March 24th, Snowflake restricts trial accounts from using Cortex AI capabilities until further notice. The only workaround for this is to convert a trial account to a paid account. **REMEMBER: You are responsible for your usage costs of YuuBot Chat v.1.2.1 after you converted your trial account to a paid one.**
 
 ## Architecture
 
