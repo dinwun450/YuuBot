@@ -8,9 +8,7 @@ CREATE OR REPLACE STAGE YUUBOT_DB.MODEL.EARTHQUAKE_STAGE
 
 --- Replace the file prefixes below with the correct local paths to your files ---
 PUT file://./all_month.csv @YUUBOT_DB.MODEL.EARTHQUAKE_STAGE AUTO_COMPRESS=FALSE OVERWRITE=TRUE;
-PUT file://./earthquake_prob_model_7d.pth @YUUBOT_DB.MODEL.EARTHQUAKE_STAGE AUTO_COMPRESS=FALSE OVERWRITE=TRUE;
-PUT file://./yamls/jp_quake_logger.yaml @YUUBOT_DB.MODEL.EARTHQUAKE_STAGE AUTO_COMPRESS=FALSE OVERWRITE=TRUE;
-PUT file://./yamls/global_quake_logger.yaml @YUUBOT_DB.MODEL.EARTHQUAKE_STAGE AUTO_COMPRESS=FALSE OVERWRITE=TRUE;
+-- Do manual loading for PTH and YAML files: earthquake_prob_model_7d.pth, jp_quake_logger.yaml, global_quake_logger.yaml --
 
 CREATE OR REPLACE FUNCTION FORECAST_EARTHQUAKE_PROB (
     TARGET_LAT FLOAT,
