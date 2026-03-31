@@ -275,7 +275,7 @@ Once the application is running, you can ask questions like:
    - Go to Goverance and Security -> Network Policy -> "+ Network Policy" -> Add Name (and description since it's optional) -> "+ Create Rule" -> Create. Activate it afterwards.
 
 7. **"Error: Access denied to trial accounts"**
-   - As of March 22nd, [Snowflake restricts trial accounts from using Cortex AI capabilities until further notice](https://snowflake.discourse.group/t/cortex-agent-not-able-to-logi-in-to-trial-version/19437). The only workaround for this is to convert a trial account to a paid account. **REMEMBER: You are responsible for your usage costs of YuuBot Chat v.1.2.1 after you converted your trial account to a paid one.**
+   - As of March 22nd, [Snowflake restricts trial accounts from using Cortex AI capabilities until further notice](https://snowflake.discourse.group/t/my-statement-about-why-trial-accounts-couldnt-access-cortex-ai-features/19453). The only workaround for this is to convert a trial account to a paid account. **REMEMBER: You are responsible for your usage costs of YuuBot Chat v.1.2.1 after you converted your trial account to a paid one.**
 
 ## Architecture
 
