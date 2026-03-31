@@ -114,42 +114,6 @@ Add the following planning instruction:
 
 4. Click **Save** to save the agent configuration
 
-## Environment Configuration
-
-### Step 1: Create Environment File
-
-Create a `.env` file in the `YuuBot1.2.1Chat` directory:
-
-```bash
-# Snowflake Configuration
-SNOWFLAKE_ACCOUNT=your_account_identifier
-SNOWFLAKE_USER=your_username
-SNOWFLAKE_PASSWORD=your_password
-SNOWFLAKE_WAREHOUSE=EARTHQUAKE_WH_XS
-SNOWFLAKE_DATABASE=YUUBOT_DB
-SNOWFLAKE_SCHEMA=GLOBAL
-
-# Weights & Biases (optional but recommended)
-WANDB_API_KEY=your_wandb_api_key
-```
-
-### Step 2: Update Application Configuration
-
-Edit `yuubot_1.2.1_chat.py` and update the following variables at the top of the file:
-
-```python
-PAT = "your_snowflake_personal_access_token"  # Snowflake PAT
-HOST = "your_snowflake_account.snowflakecomputing.com"  # Snowflake host
-DATABASE = "YUUBOT_DB"
-SCHEMA = "GLOBAL"
-AGENT = "YUUBOT_CHAT_V121"
-```
-
-**To generate a Personal Access Token (PAT):**
-1. In Snowsight, click on your profile >> **My Profile**
-2. Navigate to **Authentication** >> **Personal Access Tokens**
-3. Click **Generate Token** and copy the token
-
 ## Data Refresh
 
 Before running the application, populate the earthquake data tables.
@@ -185,14 +149,50 @@ python load_csv.py --output all_month.csv --upload-stage
 
 ## Running YuuBot Chat v.1.2.1 with Streamlit
 
-### Step 1: Unzip Models (if not done)
+Video: https://youtu.be/GP6wv-rAqT0
+
+### Step 1: Create Environment File
+
+Create a `.env` file in the `YuuBot1.2.1Chat` directory:
+
+```bash
+# Snowflake Configuration
+SNOWFLAKE_ACCOUNT=your_account_identifier
+SNOWFLAKE_USER=your_username
+SNOWFLAKE_PASSWORD=your_password
+SNOWFLAKE_WAREHOUSE=EARTHQUAKE_WH_XS
+SNOWFLAKE_DATABASE=YUUBOT_DB
+SNOWFLAKE_SCHEMA=GLOBAL
+
+# Weights & Biases (optional but recommended)
+WANDB_API_KEY=your_wandb_api_key
+```
+
+### Step 2: Update Application Configuration
+
+Edit `yuubot_1.2.1_chat.py` and update the following variables at the top of the file:
+
+```python
+PAT = "your_snowflake_personal_access_token"  # Snowflake PAT
+HOST = "your_snowflake_account.snowflakecomputing.com"  # Snowflake host
+DATABASE = "YUUBOT_DB"
+SCHEMA = "GLOBAL"
+AGENT = "YUUBOT_CHAT_V121"
+```
+
+**To generate a Personal Access Token (PAT):**
+1. In Snowsight, click on your profile >> **My Profile**
+2. Navigate to **Authentication** >> **Personal Access Tokens**
+3. Click **Generate Token** and copy the token
+
+### Step 3: Unzip Models (if not done)
 
 If `models.zip` exists, unzip it to extract the required model files:
 ```bash
 unzip models.zip
 ```
 
-### Step 2: Run the Streamlit Application
+### Step 4: Run the Streamlit Application
 
 ```bash
 cd YuuBot1.2.1Chat
@@ -201,7 +201,7 @@ streamlit run yuubot_1.2.1_chat.py
 
 The application will start and display a URL (typically `http://localhost:8501`).
 
-### Step 3: Access the Chat Interface
+### Step 5: Access the Chat Interface
 
 Open your browser and navigate to the URL shown in the terminal. You'll see the YuuBot Chat v.1.2.1 interface.
 
@@ -215,7 +215,7 @@ port = 8501
 headless = true
 
 [theme]
-primaryColor = "#FF4B4B"
+primaryColor = "#446A43"
 backgroundColor = "#FFFFFF"
 secondaryBackgroundColor = "#F0F2F6"
 textColor = "#262730"
