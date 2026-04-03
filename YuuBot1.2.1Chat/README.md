@@ -27,6 +27,8 @@ pip install streamlit numpy pandas requests sseclient-py weave snowflake-connect
 
 This section guides you through setting up Snowflake Intelligence components required for YuuBot Chat v.1.2.1. For more details, refer to the [Getting Started with Snowflake Intelligence](https://www.snowflake.com/en/developers/guides/getting-started-with-snowflake-intelligence/) guide.
 
+Video: https://youtu.be/WM3GWFpXx8A
+
 ### Step 1: Database and Schema Setup
 
 1. Open **Snowsight** and create a new SQL Worksheet
@@ -55,6 +57,9 @@ PUT file://./yamls/global_quake_logger.yaml @YUUBOT_DB.MODEL.EARTHQUAKE_STAGE AU
 
 Cortex Analyst enables the agent to query structured data by generating SQL using semantic views.
 
+>[!NOTE]
+> If you have loaded the two YAML files to the YUUBOT_DB's MODEL schema, then it'll show in Cortex Analyst.
+
 1. In Snowsight, navigate to **AI & ML** >> **Cortex Analyst**
 2. Click **Create new** >> **Upload your YAML file**
 3. Upload both semantic model files:
@@ -79,7 +84,7 @@ If you want to enable search over unstructured text data (e.g., earthquake repor
 2. Click **Create agent**
 3. Configure the agent:
    - Select **Create this agent for Snowflake Intelligence**
-   - Schema: **SNOWFLAKE_INTELLIGENCE.AGENTS**
+   - Schema: **YUUBOT_DB.GLOBAL**
    - Agent object name: `YUUBOT_CHAT_V121`
    - Display name: `YuuBot Chat v.1.2.1`
 
@@ -95,24 +100,27 @@ Add the following under **Example questions**:
 1. **JP_QUAKE_LOGGING_TOOL**
    - Semantic model: `jp_quake_logger.yaml`
    - Database: YUUBOT_DB, Schema: JP
-   - Description: Japan earthquake logging and analysis
+   - Description: [See configuration.txt file]
 
 2. **GLOBAL_QUAKE_LOGGING_TOOL**
    - Semantic model: `global_quake_logger.yaml`
    - Database: YUUBOT_DB, Schema: GLOBAL
-   - Description: Global earthquake monitoring
+   - Description: [See configuration.txt file]
 
 **Custom Tools:**
 3. **MODEL_QUAKE_FORECASTER**
    - Type: User-Defined Function (UDF)
    - Function: `FORECAST_EARTHQUAKE_PROB(TARGET_LAT, TARGET_LON, RADIUS_KM)`
-   - Description: Earthquake probability forecasting using LSTM neural network
+   - Description: [See configuration.txt file]
 
 #### Orchestration Instructions
 Add the following planning instruction:
 > "If the user specifies global earthquakes in the prompt, the agent must use the 'GLOBAL_QUAKE_LOGGING_TOOL' tool. If the user specifies Japan earthquakes in their prompt, the agent must use the 'JP_QUAKE_LOGGING_TOOL' tool. Dismiss questions that are not related to earthquakes."
 
 4. Click **Save** to save the agent configuration
+
+> [!WARNING]
+> As of March 22nd, Snowflake trial accounts cannot access Cortex features. To bypass this error, you may need to convert your trial account to a paid one. See #7 of Common Issues from the Troubleshooting section for more details.
 
 ## Data Refresh
 
@@ -200,6 +208,9 @@ streamlit run yuubot_1.2.1_chat.py
 ```
 
 The application will start and display a URL (typically `http://localhost:8501`).
+
+> [!WARNING]
+> If you start chatting with the Streamlit agent right away, then you'll encounter the error in which a network policy is required. See #6 of Common Issues in the Troubleshooting section for fixing this issue.
 
 ### Step 5: Access the Chat Interface
 
