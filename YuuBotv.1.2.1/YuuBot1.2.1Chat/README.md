@@ -27,6 +27,8 @@ pip install streamlit numpy pandas requests sseclient-py weave snowflake-connect
 
 This section guides you through setting up Snowflake Intelligence components required for YuuBot Chat v.1.2.1. For more details, refer to the [Getting Started with Snowflake Intelligence](https://www.snowflake.com/en/developers/guides/getting-started-with-snowflake-intelligence/) guide.
 
+Video: https://youtu.be/WM3GWFpXx8A
+
 ### Step 1: Database and Schema Setup
 
 1. Open **Snowsight** and create a new SQL Worksheet
@@ -55,6 +57,9 @@ PUT file://./yamls/global_quake_logger.yaml @YUUBOT_DB.MODEL.EARTHQUAKE_STAGE AU
 
 Cortex Analyst enables the agent to query structured data by generating SQL using semantic views.
 
+>[!NOTE]
+> If you have loaded the two YAML files to the YUUBOT_DB's MODEL schema, then it'll show in Cortex Analyst.
+
 1. In Snowsight, navigate to **AI & ML** >> **Cortex Analyst**
 2. Click **Create new** >> **Upload your YAML file**
 3. Upload both semantic model files:
@@ -79,7 +84,7 @@ If you want to enable search over unstructured text data (e.g., earthquake repor
 2. Click **Create agent**
 3. Configure the agent:
    - Select **Create this agent for Snowflake Intelligence**
-   - Schema: **SNOWFLAKE_INTELLIGENCE.AGENTS**
+   - Schema: **YUUBOT_DB.GLOBAL**
    - Agent object name: `YUUBOT_CHAT_V121`
    - Display name: `YuuBot Chat v.1.2.1`
 
@@ -95,18 +100,18 @@ Add the following under **Example questions**:
 1. **JP_QUAKE_LOGGING_TOOL**
    - Semantic model: `jp_quake_logger.yaml`
    - Database: YUUBOT_DB, Schema: JP
-   - Description: Japan earthquake logging and analysis
+   - Description: [See configuration.txt file]
 
 2. **GLOBAL_QUAKE_LOGGING_TOOL**
    - Semantic model: `global_quake_logger.yaml`
    - Database: YUUBOT_DB, Schema: GLOBAL
-   - Description: Global earthquake monitoring
+   - Description: [See configuration.txt file]
 
 **Custom Tools:**
 3. **MODEL_QUAKE_FORECASTER**
    - Type: User-Defined Function (UDF)
    - Function: `FORECAST_EARTHQUAKE_PROB(TARGET_LAT, TARGET_LON, RADIUS_KM)`
-   - Description: Earthquake probability forecasting using LSTM neural network
+   - Description: [See configuration.txt file]
 
 #### Orchestration Instructions
 Add the following planning instruction:
@@ -114,41 +119,8 @@ Add the following planning instruction:
 
 4. Click **Save** to save the agent configuration
 
-## Environment Configuration
-
-### Step 1: Create Environment File
-
-Create a `.env` file in the `YuuBot1.2.1Chat` directory:
-
-```bash
-# Snowflake Configuration
-SNOWFLAKE_ACCOUNT=your_account_identifier
-SNOWFLAKE_USER=your_username
-SNOWFLAKE_PASSWORD=your_password
-SNOWFLAKE_WAREHOUSE=EARTHQUAKE_WH_XS
-SNOWFLAKE_DATABASE=YUUBOT_DB
-SNOWFLAKE_SCHEMA=GLOBAL
-
-# Weights & Biases (optional but recommended)
-WANDB_API_KEY=your_wandb_api_key
-```
-
-### Step 2: Update Application Configuration
-
-Edit `yuubot_1.2.1_chat.py` and update the following variables at the top of the file:
-
-```python
-PAT = "your_snowflake_personal_access_token"  # Snowflake PAT
-HOST = "your_snowflake_account.snowflakecomputing.com"  # Snowflake host
-DATABASE = "YUUBOT_DB"
-SCHEMA = "GLOBAL"
-AGENT = "YUUBOT_CHAT_V121"
-```
-
-**To generate a Personal Access Token (PAT):**
-1. In Snowsight, click on your profile >> **My Profile**
-2. Navigate to **Authentication** >> **Personal Access Tokens**
-3. Click **Generate Token** and copy the token
+> [!WARNING]
+> As of March 22nd, Snowflake trial accounts cannot access Cortex features. To bypass this error, you may need to convert your trial account to a paid one. See #7 of Common Issues from the Troubleshooting section for more details.
 
 ## Data Refresh
 
@@ -185,14 +157,50 @@ python load_csv.py --output all_month.csv --upload-stage
 
 ## Running YuuBot Chat v.1.2.1 with Streamlit
 
-### Step 1: Unzip Models (if not done)
+Video: https://youtu.be/GP6wv-rAqT0
+
+### Step 1: Create Environment File
+
+Create a `.env` file in the `YuuBot1.2.1Chat` directory:
+
+```bash
+# Snowflake Configuration
+SNOWFLAKE_ACCOUNT=your_account_identifier
+SNOWFLAKE_USER=your_username
+SNOWFLAKE_PASSWORD=your_password
+SNOWFLAKE_WAREHOUSE=EARTHQUAKE_WH_XS
+SNOWFLAKE_DATABASE=YUUBOT_DB
+SNOWFLAKE_SCHEMA=GLOBAL
+
+# Weights & Biases (optional but recommended)
+WANDB_API_KEY=your_wandb_api_key
+```
+
+### Step 2: Update Application Configuration
+
+Edit `yuubot_1.2.1_chat.py` and update the following variables at the top of the file:
+
+```python
+PAT = "your_snowflake_personal_access_token"  # Snowflake PAT
+HOST = "your_snowflake_account.snowflakecomputing.com"  # Snowflake host
+DATABASE = "YUUBOT_DB"
+SCHEMA = "GLOBAL"
+AGENT = "YUUBOT_CHAT_V121"
+```
+
+**To generate a Personal Access Token (PAT):**
+1. In Snowsight, click on your profile >> **My Profile**
+2. Navigate to **Authentication** >> **Personal Access Tokens**
+3. Click **Generate Token** and copy the token
+
+### Step 3: Unzip Models (if not done)
 
 If `models.zip` exists, unzip it to extract the required model files:
 ```bash
 unzip models.zip
 ```
 
-### Step 2: Run the Streamlit Application
+### Step 4: Run the Streamlit Application
 
 ```bash
 cd YuuBot1.2.1Chat
@@ -201,7 +209,10 @@ streamlit run yuubot_1.2.1_chat.py
 
 The application will start and display a URL (typically `http://localhost:8501`).
 
-### Step 3: Access the Chat Interface
+> [!WARNING]
+> If you start chatting with the Streamlit agent right away, then you'll encounter the error in which a network policy is required. See #6 of Common Issues in the Troubleshooting section for fixing this issue.
+
+### Step 5: Access the Chat Interface
 
 Open your browser and navigate to the URL shown in the terminal. You'll see the YuuBot Chat v.1.2.1 interface.
 
@@ -215,7 +226,7 @@ port = 8501
 headless = true
 
 [theme]
-primaryColor = "#FF4B4B"
+primaryColor = "#446A43"
 backgroundColor = "#FFFFFF"
 secondaryBackgroundColor = "#F0F2F6"
 textColor = "#262730"
@@ -275,7 +286,7 @@ Once the application is running, you can ask questions like:
    - Go to Goverance and Security -> Network Policy -> "+ Network Policy" -> Add Name (and description since it's optional) -> "+ Create Rule" -> Create. Activate it afterwards.
 
 7. **"Error: Access denied to trial accounts"**
-   - As of March 22nd, [Snowflake restricts trial accounts from using Cortex AI capabilities until further notice](https://snowflake.discourse.group/t/cortex-agent-not-able-to-logi-in-to-trial-version/19437). The only workaround for this is to convert a trial account to a paid account. **REMEMBER: You are responsible for your usage costs of YuuBot Chat v.1.2.1 after you converted your trial account to a paid one.**
+   - As of March 22nd, [Snowflake restricts trial accounts from using Cortex AI capabilities until further notice](https://snowflake.discourse.group/t/my-statement-about-why-trial-accounts-couldnt-access-cortex-ai-features/19453). The only workaround for this is to convert a trial account to a paid account. **REMEMBER: You are responsible for your usage costs of YuuBot Chat v.1.2.1 after you converted your trial account to a paid one.**
 
 ## Architecture
 
