@@ -1,0 +1,122 @@
+name: JP_QUAKE_LOGGER
+tables:
+  - name: ALL_JP_EARTHQUAKES
+    description: This table stores historical earthquake data for Japan, capturing key details about each seismic event, including the date and time of occurrence, location of the epicenter, magnitude, intensity, and geographical coordinates (latitude and longitude).
+    base_table:
+      database: YUUBOT_DB
+      schema: JP
+      table: ALL_JP_EARTHQUAKES
+    dimensions:
+      - name: DATE
+        description: Date of the earthquake occurrence.
+        expr: DATE
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - '2025-11-09'
+          - '2025-11-08'
+          - '2025-11-07'
+      - name: EPICENTER
+        description: Location of the earthquake epicenter. The user must type the location in Japanese language.
+        expr: EPICENTER
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - 三陸沖
+          - 沖縄本島近海
+          - 三陸沖
+      - name: INTENSITY
+        synonyms:
+          - shindo
+        description: The intensity of the earthquake, with 7 being the highest and 1 being the lowest, indicating the severity of the earthquake's impact. For earthquakes with a shindo rating of 5 and 6, they have a lower and upper scale indicated as "弱" or "強". In other words, if the user typed 5-, 5+, 6-, or 6+, they'll be replaced with 5弱, 5強, 6弱, or 6強.
+        expr: INTENSITY
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - '3'
+          - '2'
+          - '1'
+      - name: MAGNITUDE
+        description: The magnitude of the earthquake, measured on the Richter scale, indicating the size of the seismic event.
+        expr: MAGNITUDE
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - '5.6'
+          - '4.3'
+          - '2.6'
+      - name: TIME
+        description: The time of day when the earthquake occurred, in 24-hour format (HH:MM:SS).
+        expr: TIME
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - '19:46:00'
+          - '18:28:00'
+          - '18:17:00'
+    filters:
+      - name: significant_quakes
+        synonyms:
+          - considerable_quakes
+          - large_quakes
+          - major_quakes
+          - notable_quakes
+          - substantial_quakes
+        description: Indicates whether the earthquake was significant, meaning it had a magnitude of 5.0 or higher, or caused significant damage or casualties.
+        expr: MAGNITUDE > 5.0
+    metrics:
+      - name: AVERAGE_MAGNITUDE_OF_JAPAN_EARTHQUAKES
+        synonyms:
+          - average_japan_quake_magnitude
+          - average_seismic_intensity
+          - japan_earthquake_average
+          - mean_earthquake_magnitude
+          - mean_magnitude_japan_earthquakes
+        description: The average magnitude of earthquakes that occurred in Japan.
+        expr: SUM(MAGNITUDE)/COUNT(*)
+        access_modifier: public_access
+verified_queries:
+  - name: How many earthquakes were recorded in Japan?
+    question: How many earthquakes were recorded in Japan?
+    sql: |-
+      SELECT
+        MIN(date) AS start_date,
+        MAX(date) AS end_date,
+        COUNT(*) AS total_earthquakes
+      FROM
+        all_jp_earthquakes
+      ORDER BY
+        start_date DESC NULLS LAST
+    use_as_onboarding_question: true
+    verified_by: Dino Wun
+    verified_at: 1762684861
+  - name: What is the most recent earthquake in Japan?
+    question: What is the most recent earthquake in Japan?
+    sql: |-
+      SELECT
+        date,
+        time,
+        epicenter,
+        magnitude,
+        intensity
+      FROM
+        all_jp_earthquakes
+      ORDER BY
+        date DESC NULLS LAST,
+        time DESC NULLS LAST
+      LIMIT
+        1
+    use_as_onboarding_question: true
+    verified_by: Dino Wun
+    verified_at: 1762684886
+  - name: How many significant earthquakes are there in Japan?
+    question: How many significant earthquakes are there in Japan?
+    sql: |-
+      SELECT
+        MIN(date) AS start_date,
+        MAX(date) AS end_date,
+        COUNT(*) AS total_significant_earthquakes
+      FROM
+        all_jp_earthquakes
+      WHERE
+        magnitude > 5.0
+      ORDER BY
+        start_date DESC NULLS LAST
+    use_as_onboarding_question: false
+    verified_by: Dino Wun
+    verified_at: 1762684912

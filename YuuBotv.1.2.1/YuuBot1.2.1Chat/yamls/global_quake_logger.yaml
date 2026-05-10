@@ -1,0 +1,149 @@
+name: GLOBAL_QUAKE_LOGGER
+tables:
+  - name: ALL_EARTHQUAKES_WEEK
+    description: This table stores information about earthquakes that occurred within a week, including the date and time of the earthquake, its magnitude, location, and whether it triggered a tsunami, as well as the latitude and longitude of the epicenter.
+    base_table:
+      database: YUUBOT_DB
+      schema: GLOBAL
+      table: ALL_EARTHQUAKES_WEEK
+    dimensions:
+      - name: DATE
+        description: Date of the earthquake occurrence.
+        expr: DATE
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - '2025-11-09'
+          - '2025-11-08'
+          - '2025-11-07'
+      - name: LOCATION
+        description: The location of the earthquake, including the distance and direction from a nearby city or geographical feature.
+        expr: LOCATION
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - 66 km NNE of Calama, Chile
+          - 190 km E of Atka, Alaska
+          - 26 km ESE of Santa María Chimalapa, Mexico
+      - name: TIME
+        description: The time of day when the earthquake occurred, in 24-hour format (HH:MM:SS).
+        expr: TIME
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - '14:10:39'
+          - '14:00:07'
+          - '01:05:03'
+      - name: TITLE
+        description: A text description of the earthquake event, including its magnitude, location, and distance from a nearby city or landmark.
+        expr: TITLE
+        data_type: VARCHAR(16777216)
+        sample_values:
+          - M 5.2 - 126 km E of Yamada, Japan
+          - M 2.8 - 9 km SE of Midland, Texas
+          - M 2.8 - 23 km W of Petrolia, CA
+      - name: TSUNAMI
+        description: Indicates whether the earthquake generated a tsunami.
+        expr: TSUNAMI
+        data_type: BOOLEAN
+        sample_values:
+          - 'FALSE'
+          - 'TRUE'
+    facts:
+      - name: MAGNITUDE
+        description: Magnitude of the earthquake, measured on the Richter scale, indicating the size of the seismic event.
+        expr: MAGNITUDE
+        data_type: FLOAT
+        access_modifier: public_access
+        sample_values:
+          - '2.63'
+          - '5.2'
+          - '4.5'
+    filters:
+      - name: any_tsunami_from_quakes
+        synonyms:
+          - earthquake_generated_tsunami
+          - quake_triggered_tsunami
+          - tsunami_from_earthquakes
+          - tsunami_induced_by_quakes
+          - tsunami_occurrence
+        description: Indicates whether any tsunami warnings were issued as a result of the earthquakes in the dataset.
+        expr: TSUNAMI
+    metrics:
+      - name: AVERAGE_MAGNITUDE
+        synonyms:
+          - average_earthquake_magnitude
+          - average_seismic_intensity
+          - magnitude_average
+          - mean_magnitude
+          - seismic_magnitude_mean
+        description: The average magnitude of earthquakes that occurred during the week.
+        expr: SUM(MAGNITUDE)/COUNT(*)
+        access_modifier: public_access
+verified_queries:
+  - name: How many quakes are there globally?
+    question: How many quakes are there globally?
+    sql: |-
+      SELECT
+        COUNT(*) AS total_quakes,
+        MIN(date) AS start_date,
+        MAX(date) AS end_date
+      FROM
+        all_earthquakes_week
+    use_as_onboarding_question: false
+    verified_by: Dino Wun
+    verified_at: 1762685301
+  - name: What's the most recent global earthquake?
+    question: What's the most recent global earthquake?
+    sql: |-
+      SELECT
+        date,
+        time,
+        location,
+        magnitude,
+        tsunami,
+        title
+      FROM
+        all_earthquakes_week
+      WHERE
+        date = (
+          SELECT
+            MAX(date)
+          FROM
+            all_earthquakes_week
+        )
+      ORDER BY
+        time DESC NULLS LAST
+      LIMIT
+        1
+    use_as_onboarding_question: false
+    verified_by: Dino Wun
+    verified_at: 1762685328
+  - name: |
+      What's the most recent earthquake that spawned a tsunami?
+    question: |
+      What's the most recent earthquake that spawned a tsunami?
+    sql: |-
+      SELECT
+        date,
+        time,
+        location,
+        magnitude,
+        tsunami,
+        title
+      FROM
+        all_earthquakes_week
+      WHERE
+        tsunami = TRUE
+        AND date = (
+          SELECT
+            MAX(date)
+          FROM
+            all_earthquakes_week
+          WHERE
+            tsunami = TRUE
+        )
+      ORDER BY
+        time DESC NULLS LAST
+      LIMIT
+        1
+    use_as_onboarding_question: false
+    verified_by: Dino Wun
+    verified_at: 1762685353

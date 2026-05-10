@@ -1,0 +1,98 @@
+CREATE OR REPLACE AGENT YUUBOT_DB.GLOBAL.YUUBOT_CHAT
+  PROFILE = '{"display_name": "YuuBot Chat v.1.2.2", "avatar": "GlobeAgentIcon", "color": "var(--x11sbcwy)"}'
+  FROM SPECIFICATION
+  $$
+  models:
+    orchestration: auto
+
+  instructions:
+    response: "The agent must provide its response in bullet points. If the location is written in Japanese, translate it to English. Use any visualizations if the user says is necessary in their prompt."
+    orchestration: "If the user specifies global earthquakes in the prompt, the agent must use the GLOBAL_QUAKE_LOGGING_TOOL tool. If the user specifies Japan earthquakes in their prompt, the agent must use the JP_QUAKE_LOGGING_TOOL tool. Dismiss questions that are not related to earthquakes."
+    sample_questions:
+      - question: "How many earthquakes are recorded in Japan?"
+      - question: "What's the most recent global earthquake?"
+      - question: "Forecast the earthquake probability for Tokyo in the next 7 days."
+
+  tools:
+    - tool_spec:
+        type: "cortex_analyst_text_to_sql"
+        name: "GLOBAL_QUAKE_LOGGING_TOOL"
+        description: |
+          ALL_EARTHQUAKES_WEEK:
+          - Database: YUUBOT_DB, Schema: GLOBAL
+          - Contains detailed records of global earthquake events within a one-week period, including location, magnitude, and tsunami warnings.
+          - Provides comprehensive tracking of seismic activities with temporal and spatial information.
+          - LIST OF COLUMNS: DATE (earthquake occurrence date), TIME (time of earthquake), LOCATION (geographical location of earthquake), TITLE (descriptive text of earthquake event), TSUNAMI (boolean indicating tsunami generation), MAGNITUDE (earthquake magnitude measurement)
+
+          REASONING:
+          This semantic model focuses on global earthquake monitoring and tracking, with emphasis on recent seismic activities within a week's timeframe. The model is designed to provide real-time earthquake information and tsunami warnings, making it valuable for disaster monitoring and emergency response systems. The structure allows for quick access to critical seismic data and supports various analytical queries about earthquake occurrences, their magnitudes, and potential tsunami threats.
+
+          DESCRIPTION:
+          The GLOBAL_QUAKE_LOGGER semantic model, housed in YUUBOT_DB.GLOBAL, provides a comprehensive system for tracking and analyzing global earthquake events over a weekly period. The model captures essential seismic information including earthquake magnitudes, locations, timestamps, and tsunami warnings, enabling real-time monitoring and analysis of global seismic activities. It supports various analytical queries ranging from basic earthquake counts to complex analyses of tsunami-generating events, making it particularly useful for disaster monitoring and emergency response systems. The model's structure allows for efficient tracking of earthquake patterns and quick identification of potentially dangerous seismic events, especially those that might trigger tsunamis.
+    - tool_spec:
+        type: "cortex_analyst_text_to_sql"
+        name: "JP_QUAKE_LOGGING_TOOL"
+        description: |
+          ALL_JP_EARTHQUAKES:
+          - Database: YUUBOT_DB, Schema: JP
+          - Contains comprehensive records of earthquakes that occurred in Japan, capturing essential seismic event details.
+          - Enables tracking and analysis of earthquake patterns, intensities, and locations across Japan.
+          - LIST OF COLUMNS: DATE (earthquake occurrence date), TIME (time of earthquake), EPICENTER (location in Japanese), INTENSITY (shindo scale measurement), MAGNITUDE (earthquake magnitude measurement)
+
+          REASONING:
+          This semantic model focuses on tracking and analyzing earthquake events in Japan through a single comprehensive table. The model captures critical seismic information including temporal data (date and time), spatial data (epicenter locations), and severity measurements (intensity and magnitude). The inclusion of verified queries demonstrates its practical application in monitoring earthquake activity, particularly significant events with magnitude greater than 5.0.
+
+          DESCRIPTION:
+          The JP_QUAKE_LOGGER semantic model, housed in YUUBOT_DB.JP schema, provides a comprehensive system for logging and analyzing earthquake events throughout Japan. The model captures detailed seismic information including date, time, location (in Japanese), intensity (shindo scale), and magnitude measurements for each earthquake occurrence. It supports various analytical queries, from basic earthquake counts to identifying significant seismic events, and includes functionality to track recent earthquake activities. The model is particularly useful for monitoring seismic patterns and analyzing earthquake trends in Japan, with special attention to significant earthquakes (magnitude > 5.0).
+
+    - tool_spec:
+        type: "generic"
+        name: "FORECAST_EARTHQUAKE_PROB_TOOL"
+        description: |
+          PROCEDURE/FUNCTION DETAILS:
+          - Type: User-Defined Function (UDF)
+          - Language: Python
+          - Signature: (TARGET_LAT FLOAT, TARGET_LON FLOAT, RADIUS_KM NUMBER)
+          - Returns: VARIANT
+          - Execution: Standard with CALLED ON NULL INPUT
+          - Volatility: VOLATILE
+          - Primary Function: Earthquake probability forecasting
+          - Target: Geospatial seismic data analysis
+          - Error Handling: Returns structured error messages in JSON format
+
+          DESCRIPTION:
+          This advanced machine learning function leverages a pre-trained LSTM neural network to predict the probability of significant seismic events (magnitude ≥ 4.5) over the next 7 days for a specified geographic location and radius. The function processes historical earthquake data from the provided CSV file, utilizing a 5-day lookback window to generate daily probability forecasts, and returns a structured JSON response containing both the daily predictions and a 7-day average probability. Built using PyTorch and running on Snowflake's Python runtime environment, this UDF combines geospatial calculations with deep learning to provide actionable seismic risk assessments. The function includes comprehensive error handling for scenarios such as insufficient historical data or model loading failures, and requires access to both the earthquake data CSV and the pre-trained model file stored in the EARTHQUAKE_STAGE.
+
+          USAGE SCENARIOS:
+          - Risk assessment for infrastructure planning and emergency preparedness in seismically active regions
+          - Real-time monitoring and early warning system integration for disaster management agencies
+          - Scientific research and validation of seismic prediction models in specific geographic areas
+        input_schema:
+          type: "object"
+          properties:
+            TARGET_LAT:
+              type: "number"
+              description: "Target latitude"
+            TARGET_LON:
+              type: "number"
+              description: "Target longitude"
+            RADIUS_KM:
+              type: "number"
+              description: "Radius in kilometers"
+          required:
+            - TARGET_LAT
+            - TARGET_LON
+            - RADIUS_KM
+
+  tool_resources:
+    GLOBAL_QUAKE_LOGGING_TOOL:
+      semantic_model_file: "@YUUBOT_DB.MODEL.EARTHQUAKE_STAGE/global_quake_logger.yaml"
+    JP_QUAKE_LOGGING_TOOL:
+      semantic_model_file: "@YUUBOT_DB.MODEL.EARTHQUAKE_STAGE/jp_quake_logger.yaml"
+    FORECAST_EARTHQUAKE_PROB_TOOL:
+      type: "function"
+      execution_environment:
+        type: "warehouse"
+        warehouse: "EARTHQUAKE_WH_XS"
+      identifier: "YUUBOT_DB.MODEL.FORECAST_EARTHQUAKE_PROB"
+  $$;
