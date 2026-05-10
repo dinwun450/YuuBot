@@ -87,8 +87,14 @@ CREATE OR REPLACE AGENT YUUBOT_DB.GLOBAL.YUUBOT_CHAT
   tool_resources:
     GLOBAL_QUAKE_LOGGING_TOOL:
       semantic_model_file: "@YUUBOT_DB.MODEL.EARTHQUAKE_STAGE/global_quake_logger.yaml"
+      execution_environment:
+        type: "warehouse"
+        warehouse: "EARTHQUAKE_WH_XS"
     JP_QUAKE_LOGGING_TOOL:
       semantic_model_file: "@YUUBOT_DB.MODEL.EARTHQUAKE_STAGE/jp_quake_logger.yaml"
+      execution_environment:
+        type: "warehouse"
+        warehouse: "EARTHQUAKE_WH_XS"
     FORECAST_EARTHQUAKE_PROB_TOOL:
       type: "function"
       execution_environment:
