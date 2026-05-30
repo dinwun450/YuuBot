@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <title>YuuBot v.1.2.1 (BETA)</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav id="navbar">
+        <h1>YuuBot</h1>
+        <ul>
+            <li class="tablinks glassflow gf_hover" id="defaulttab" onclick="openTab(event, 'home')"><a href="#"><i class="fa-solid fa-house"></i>&nbsp;&nbsp;Overview</a></li>
+            <li class="tablinks glassflow gf_hover" onclick="openTab(event, 'japan')"><a href="#"><i class="fa-solid fa-yen-sign"></i>&nbsp;&nbsp;Japan</a></li>
+            <li class="tablinks glassflow gf_hover" onclick="openTab(event, 'global')"><a href="#"><i class="fa-solid fa-globe"></i>&nbsp;&nbsp;Global</a></li>
+            <li class="tablinks glassflow gf_hover" onclick="openTab(event, 'mapviewer')"><a href="#"><i class="fa-solid fa-map"></i>&nbsp;&nbsp;Map</a></li>
+            <li class="tablinks glassflow gf_hover" onclick="openTab(event, 'about')"><a href="#"><i class="fa-solid fa-circle-info"></i>&nbsp;&nbsp;About</a></li>
+        </ul>
+        <p id="datentime">##/##/#### ##:##:##</p>
+    </nav>
+    <div class="window" id="home">
+        <h2>Overview</h2>
+        <div class="sidebyside_allquakes">
+            <div class="mostrecent_japan glassflow">
+                <h3>Most Recent Japan Earthquake</h3>
+                {% for item in recent_quakes_jp %}
+                    <p>Date (in PST): {{ item[0] }}</p>
+                    <p>Time: {{ item[1] }}</p>
+                    <p>Location: {{ item[2] }}</p>
+                    <p>Magnitude: {{ item[3] }}</p>
+                    <div class="intensity_spotlight"><img src="{{ url_for('static', filename='shindo-images/tbp' + item[4] + '.png') }}" alt="{{ item[4].replace('tbp','').replace('強','+').replace('弱','-') }}"></div>
+                {% endfor %}
+                <!--<p>Date (in PST): 2025-05-25</p>
+                <p>Time: 12:31</p>
+                <p>Location: 能登半島沖</p>
+                <p>Magnitude: 1.8</p>
+                <div class="intensity_spotlight"><img src="static\shindo-images\tbp1.png" alt="1"></div> -->
+            </div>
+            <div class="mostrecent_global glassflow">
+                <h3>Most Recent Global Earthquake</h3>
+                {% for item in recent_quakes_global %}
+                    <p>Date (in UTC): {{ item[0] }}</p>
+                    <p>Time: {{ item[1] }}</p>
+                    <p>Location: {{ item[2] }}</p>
+                    <p>Magnitude: {{ item[3] }}</p>
+                    <p>Tsunami: {{ item[4] }}</p>
+                {% endfor %}
+                <!-- <p>Date (in UTC): 2025-05-25</p>
+                <p>Time: 10:15</p>
+                <p>Location: Chile Offshore</p>
+                <p>Magnitude: 6.2</p>
+                <p>Tsunami: No</p> -->
+            </div>
+        </div>
+        <div class="earthquake_counts glassflow">
+            <div class="jp_quake_counts">
+                <h3>Total Japan Earthquakes Recorded</h3>
+                <p>-</p>
+            </div>
+            <div class="jp_quake_sig_counts">
+                <h3>Total Significant Japan Earthquakes (M4.0+)</h3>
+                <p>-</p>
+            </div>
+            <div class="global_quake_counts">
+                <h3>Total Global Earthquakes Recorded</h3>
+                <p>-</p>
+            </div>
+            <div class="global_quake_sig_counts">
+                <h3>Total Significant Global Earthquakes (M4.0+)</h3>
+                <p>-</p>
+            </div>
+        </div>
+    </div>
+    <div class="window" id="japan">
+        <h2>Recent Japan Earthquakes</h2>
+        <div class="filtering_tools">
+            <input type="text" class="glassflow" id="search" onkeyup="filterTable()" placeholder="Search by date, location, magnitude, or intensity...">
+            <button id="filter_quakes" class="glassflow gf_hover">Filter</button>
+        </div>
+        <div id="modalbox_filter" class="modal">
+            <div class="glassflow modal_content">
+                <span class="close">&times;</span>
+                <h2>Filter Earthquakes</h2>
+                <form id="filter_form">
+                    <label for="date">Date:</label>
+                    <input type="date" id="date" name="date" class="glassflow"><br>
+                    <label for="magnitude">Magnitude:</label>
+                    <input type="number" step="0.1" id="magnitude" name="magnitude" class="glassflow"><br>
+                    <label for="intensity">Intensity:</label>
+                    <select id="intensity" name="intensity" class="glassflow">
+                        <option value="">Any</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5-">5-</option>
+                        <option value="5+">5+</option>
+                        <option value="6-">6-</option>
+                        <option value="6+">6+</option>
+                        <option value="7">7</option>
+                    </select><br><br>
+                </form>
+            </div>
+        </div>
+        <div class="table_fix_head glassflow">
+            <table class="earthquake-table" border="1" id="tableJP">
+                <thead>
+                    <tr>
+                        <th class="first">Date (in JST)</th>
+                        <th class="middle">Time (in JST)</th>
+                        <th class="middle">Location</th>
+                        <th class="middle">Magnitude</th>
+                        <th class="last">Intensity</th>
+                    </tr>
+                </thead>
+                <tbody id="insert_jp_quakes">
+                    {% for earthquake in jp_quakes %}
+                    <tr>
+                        <td>{{ earthquake[0] }}</td>
+                        <td>{{ earthquake[1] }}</td>
+                        <td>{{ earthquake[2] }}</td>
+                        <td>{{ earthquake[3] }}</td>
+                        <td>
+                            <img src="{{ url_for('static', filename='shindo-images/tbp' + earthquake[4] + '.png') }}"
+                                 alt="{{ earthquake[4].replace('tbp','').replace('強','+').replace('弱','-') }}">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <button id="refresh" onclick="refreshJPEarthquakeData()" class="glassflow gf_hover">Refresh Data</button>
+    </div>
+    <div class="window" id="global">
+        <h2>Recent Global Earthquakes</h2>
+        <div class="filtering_tools">
+            <input type="text" class="glassflow" id="search_global" onkeyup="filterTableGlobal()" placeholder="Search by date, location, title, magnitude, or tsunami...">
+            <button id="filter_quakes_global" class="glassflow gf_hover">Filter</button>
+        </div>
+        <div id="modalbox_filter_global" class="modal">
+            <div class="glassflow modal_content">
+                <span class="close_global">&times;</span>
+                <h2>Filter Global Earthquakes</h2>
+                <form id="filter_form_global">
+                    <label for="date_global">Date:</label>
+                    <input type="date" id="date_global" name="date_global" class="glassflow"><br>
+                    <label for="magnitude_global">Magnitude:</label>
+                    <input type="number" step="0.1" id="magnitude_global" name="magnitude_global" class="glassflow"><br>
+                    <label for="tsunami_global">Tsunami:</label>
+                    <select id="tsunami_global" name="tsunami_global" class="glassflow">
+                        <option value="">Any</option>
+                        <option value="True">True</option>
+                        <option value="False">False</option>
+                    </select><br><br>
+                </form>
+            </div>
+        </div>
+        <div class="table_fix_head glassflow">
+            <table class="earthquake-table-global" border="1">
+                <thead>
+                    <tr>
+                        <th class="first">Date</th>
+                        <th class="middle">Time</th>
+                        <th class="middle">Magnitude</th>
+                        <th class="middle">Location</th>
+                        <th class="middle">Title</th>
+                        <th class="last">Tsunami</th>
+                    </tr>
+                </thead>
+                <tbody id="insert_quakes">
+                    {% for earthquake in global_quakes %}
+                    <tr>
+                        <td>{{ earthquake[0] }}</td>
+                        <td>{{ earthquake[1] }}</td>
+                        <td>{{ earthquake[2] }}</td>
+                        <td>{{ earthquake[3] }}</td>
+                        <td>{{ earthquake[4] }}</td>
+                        <td>{{ earthquake[5] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <button id="refresh" onclick="refreshGlobalEarthquakeData()" class="glassflow gf_hover">Refresh Data</button>
+    </div>
+    <div class="window" id="mapviewer">
+        <h2>Map</h2>
+        <div id="map"></div>
+    </div>
+    <div class="window" id="about">
+        <h2>About</h2>
+        <p id="about-text">
+            YuuBot is a comprehensive earthquake monitoring system for Japan and globally. It consists of two integrated components: a real-time earthquake data visualization web application and an AI-powered chatbot interface. The system continuously tracks, stores, and presents earthquake data from Japan and other parts of the world, making critical seismic information accessible through visual dashboards and natural language interactions. Created by Dino Wun.
+        </p>
+        <h3>My Socials</h3>
+        <div id="my_socials">
+            <span class="glassflow gf_hover socialmedia_boxes"><a href="" id="social_link"><i class="fa-brands fa-square-github"></i></a></span>
+            <span class="glassflow gf_hover socialmedia_boxes"><a href="" id="social_link"><i class="fa-brands fa-linkedin"></i></a></span>
+            <span class="glassflow gf_hover socialmedia_boxes"><a href="" id="social_link"><i class="fa-brands fa-square-instagram"></i></a></span>
+            <span class="glassflow gf_hover socialmedia_boxes"><a href="" id="social_link"><i class="fa-brands fa-square-facebook"></i></a></span>
+        </div>
+    </div>
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("window");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace("active", "");
+                // document.getElementById()
+            }
+            
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        document.getElementById("defaulttab").click();
+
+        // Initialize the map
+        const resizeObserver = new ResizeObserver(() => {
+            map.invalidateSize();
+        });
+        resizeObserver.observe(document.getElementById('map'));
+
+        var map = L.map('map').setView([20, 0], 2); // Centered on worldwide
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Function to fetch and plot Japan earthquake coordinates
+        function plotJPEarthquakes() {
+            fetch('/jp_coordinates')
+                .then(response => response.json())
+                .then(data => {
+                    // helper to safely pick values from common keys
+                    const pick = (obj, ...keys) => {
+                        for (const k of keys) {
+                            if (obj == null) continue;
+                            if (k in obj && obj[k] !== null && obj[k] !== undefined) return obj[k];
+                        }
+                        return undefined;
+                    };
+
+                    // Parse various shindo/intensity strings into a numeric scale (e.g. "5+" -> 5.5, "5-" -> 4.5, "弱"/"強" handled)
+                    const parseShindo = (s) => {
+                        if (s === undefined || s === null) return null;
+                        s = String(s).trim();
+                        s = s.replace(/^tbp/i, '')         // strip tbp prefix
+                             .replace(/弱/g, '-')          // convert Japanese weak/strong to +/- signs
+                             .replace(/強/g, '+')
+                             .replace(/[\s　]+/g,'');      // remove spaces
+                        // handle formats like "5弱" or "5強"
+                        s = s.replace(/^(\d)(弱|強)$/, (_, d, sign) => d + (sign === '強' ? '+' : '-'));
+                        const m = s.match(/^(\d)([+-])?$/);
+                        if (m) {
+                            let v = parseInt(m[1], 10);
+                            if (m[2] === '+') v += 0.5;
+                            if (m[2] === '-') v -= 0.5;
+                            return v;
+                        }
+                        const digits = s.match(/(\d+)/);
+                        return digits ? parseInt(digits[1], 10) : null;
+                    };
+
+                    const getColorForIntensity = (i) => {
+                        if (i === null || i === undefined || Number.isNaN(i)) return null;
+                        // intensity color scale (shindo)
+                        if (i >= 7) return '#960096';     // 7
+                        if (i >= 6.5) return '#a50207';   // 6+
+                        if (i >= 6) return '#eb1a00';     // 6-
+                        if (i >= 5.5) return '#d16a0e';   // 5+
+                        if (i >= 5) return '#f18a2e';     // 5-
+                        if (i >= 4) return '#c99c00';     // 4
+                        if (i >= 3) return '#139a4c';     // 3
+                        if (i >= 2) return '#156ca5';     // 2
+                        return '#6b7878';                 // 1 or lower
+                    };
+
+                    data.forEach(coord => {
+                        const lat = parseFloat(pick(coord, 'lat', 'latitude', 'y'));
+                        const lon = parseFloat(pick(coord, 'lon', 'lng', 'longitude', 'x'));
+
+                        // skip if coord is falsy or lat/lon not numbers
+                        if (!coord || Number.isNaN(lat) || Number.isNaN(lon)) {
+                            console.warn('Skipping invalid coord:', coord);
+                            return;
+                        }
+
+                        // optional: validate ranges
+                        if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+                            console.warn('Skipping out-of-range coord:', coord);
+                            return;
+                        }
+
+                        // try to extract quake details from common keys; fallbacks provided
+                        const magRaw = pick(coord, 'magnitude', 'mag', 'm',  'magnitude_value');
+                        const magnitude = magRaw !== undefined ? parseFloat(magRaw) : NaN;
+
+                        const intensity = pick(coord, 'intensity', 'shindo', 'int', 'intensity_label') ?? '';
+
+                        const date = pick(coord, 'date', 'datetime', 'time_utc', 'd') ?? '';
+                        const time = pick(coord, 'time', 'timestamp', 't') ?? '';
+
+                        const epicenter = pick(coord, 'epicenter', 'place', 'location', 'title') ?? '';
+
+                        // visual representation: circleMarker sized by magnitude, colored by magnitude
+                        const color = getColorForIntensity(magnitude);
+                        const radius = Number.isNaN(magnitude) ? 6 : Math.max(4, magnitude * 3);
+
+                        const marker = L.circleMarker([lat, lon], {
+                            radius: radius,
+                            color: color,
+                            fillColor: color,
+                            fillOpacity: 0.6,
+                            weight: 1
+                        }).addTo(map);
+
+                        // popup with formatted details
+                        const popupHtml = `
+                            <div>
+                                <strong>Epicenter:</strong> ${epicenter || 'N/A'}<br/>
+                                <strong>Date:</strong> ${date || 'N/A'} ${time ? ('<strong>Time:</strong> ' + time) : ''}<br/>
+                                <strong>Magnitude:</strong> ${Number.isNaN(magnitude) ? 'N/A' : magnitude}<br/>
+                                <strong>Intensity:</strong> ${intensity || 'N/A'}
+                            </div>
+                        `;
+
+                        marker.bindPopup(popupHtml);
+
+                        // optional: show a tooltip on hover with magnitude and epicenter
+                        const tooltipText = `${epicenter || 'Unknown'} — M ${Number.isNaN(magnitude) ? '?' : magnitude}`;
+                        marker.bindTooltip(tooltipText, {permanent: false, direction: 'top'});
+                    });
+                })
+                .catch(error => console.error('Error fetching JP coordinates:', error));
+        }
+
+        // Function to fetch and plot Global earthquake coordinates
+        function plotGlobalEarthquakes() {
+            fetch('/global_coordinates')
+                .then(response => response.json())
+                .then(data => {
+                    const pick = (obj, ...keys) => {
+                        for (const k of keys) {
+                            if (obj == null) continue;
+                            if (k in obj && obj[k] !== null && obj[k] !== undefined) return obj[k];
+                        }
+                        return undefined;
+                    };
+                    const getNested = (obj, path) => path.split('.').reduce((o,k)=> o && o[k], obj);
+
+                    const getColorForMag = (m) => {
+                        if (m === null || m === undefined || Number.isNaN(m)) return '#3388ff';
+                        if (m >= 8) return '#3b0000';
+                        if (m >= 7) return '#800026';
+                        if (m >= 6) return '#d73027';
+                        if (m >= 5) return '#fc4e2a';
+                        if (m >= 4) return '#fc8d59';
+                        if (m >= 3) return '#fee08b';
+                        if (m >= 2) return '#d9ef8b';
+                        return '#91cf60';
+                    };
+
+                    const fmtDateTime = (rawDate, rawTime) => {
+                        // handle epoch ms or ISO string
+                        if (typeof rawDate === 'number') return new Date(rawDate).toISOString();
+                        if (typeof rawTime === 'number') return new Date(rawTime).toISOString();
+                        if (typeof rawDate === 'string' && rawDate) return rawDate;
+                        return '';
+                    };
+
+                    data.forEach(coord => {
+                        // flexible lat/lon extraction
+                        const lat = parseFloat(pick(coord, 'lat', 'latitude', 'y') ?? getNested(coord, 'geometry.coordinates.1') ?? NaN);
+                        const lon = parseFloat(pick(coord, 'lon', 'lng', 'longitude', 'x') ?? getNested(coord, 'geometry.coordinates.0') ?? NaN);
+
+                        if (Number.isNaN(lat) || Number.isNaN(lon)) {
+                            console.warn('Skipping invalid global coord:', coord);
+                            return;
+                        }
+
+                        // magnitude (try common keys and GeoJSON properties)
+                        let magRaw = pick(coord, 'magnitude', 'mag', 'm') ?? getNested(coord, 'properties.mag') ?? getNested(coord, 'properties.magnitude');
+                        const magnitude = magRaw !== undefined && magRaw !== null ? parseFloat(magRaw) : NaN;
+
+                        // date/time/title/tsunami/location (try many common places)
+                        let dateRaw = pick(coord, 'date', 'datetime', 'time', 'time_utc') ?? getNested(coord, 'properties.time') ?? getNested(coord, 'properties.updated');
+                        let timeRaw = pick(coord, 'time', 'timestamp') ?? null;
+                        const dateTime = fmtDateTime(dateRaw, timeRaw);
+
+                        const title = pick(coord, 'title', 'properties.title', 'properties.place') ?? getNested(coord, 'properties.title') ?? '';
+                        const tsunami = pick(coord, 'tsunami', 'properties.tsunami') ?? getNested(coord, 'properties.tsunami') ?? '';
+                        const location = pick(coord, 'place', 'location', 'epicenter') ?? getNested(coord, 'properties.place') ?? title ?? '';
+
+                        // visual marker
+                        const color = getColorForMag(magnitude);
+                        const radius = Number.isNaN(magnitude) ? 6 : Math.max(4, magnitude * 3);
+
+                        const size = Math.max(12, radius * 2);
+                        const svgIcon = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+                                <rect x="1" y="1" width="${size - 2}" height="${size - 2}" rx="${Math.max(0, Math.floor(size * 0.15))}"
+                                      fill="${color}" fill-opacity="0.7" stroke="#00000022" stroke-width="1"/>
+                            </svg>
+                        `;
+                        const icon = L.divIcon({
+                            className: 'custom-svg-icon',
+                            html: svgIcon,
+                            iconSize: [size, size],
+                            iconAnchor: [Math.floor(size / 2), Math.floor(size / 2)]
+                        });
+                        const marker = L.marker([lat, lon], { icon: icon }).addTo(map);
+
+                        const popupHtml = `
+                            <div>
+                                <strong>Location:</strong> ${location || 'N/A'}<br/>
+                                <strong>Date/Time:</strong> ${dateTime || 'N/A'}<br/>
+                                <strong>Magnitude:</strong> ${Number.isNaN(magnitude) ? 'N/A' : magnitude}<br/>
+                                <strong>Title:</strong> ${title || 'N/A'}<br/>
+                                <strong>Tsunami:</strong> ${tsunami === '' ? 'N/A' : tsunami}
+                            </div>
+                        `;
+                        marker.bindPopup(popupHtml);
+
+                        const tooltipText = `${location || 'Unknown'} — M ${Number.isNaN(magnitude) ? '?' : magnitude}`;
+                        marker.bindTooltip(tooltipText, {permanent: false, direction: 'top'});
+                    });
+                })
+                .catch(error => console.error('Error fetching Global coordinates:', error));
+        }
+
+        // Call the functions to plot earthquakes
+        plotJPEarthquakes();
+        plotGlobalEarthquakes();
+
+        function getUTCDate() {
+            const now = new Date();
+            const year = now.getUTCFullYear();
+            const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(now.getUTCDate()).padStart(2, '0');
+            const hour = String(now.getUTCHours()).padStart(2, '0');
+            const minute = String(now.getUTCMinutes()).padStart(2, '0');
+            const second = String(now.getUTCSeconds()).padStart(2, '0');
+
+            // Format: YYYY-MM-DD HH:MM:SS UTC
+            const formattedDate = `${year}-${month}-${day} ${hour}:${minute}:${second} UTC`;
+            document.getElementById("datentime").innerText = formattedDate;
+        }
+
+        // Initial call to set the date and time
+        getUTCDate();
+        // Update the date and time every second
+        setInterval(getUTCDate, 1000);
+
+        var modal = document.getElementById("modalbox_filter");
+        var button = document.getElementById("filter_quakes");
+        var span = document.getElementsByClassName("close")[0];
+
+        var modal_global = document.getElementById("modalbox_filter_global");
+        var button_global = document.getElementById("filter_quakes_global");
+        var span_global = document.getElementsByClassName("close_global")[0];
+
+        button.onclick = function() {
+            modal.style.display = "block";
+        }
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        button_global.onclick = function() {
+            modal_global.style.display = "block";
+        }
+        span_global.onclick = function() {
+            modal_global.style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == modal_global) {
+                modal_global.style.display = "none";
+            }
+        }
+
+        document.getElementById("date").addEventListener("change", function() {
+            const inputDate = this.value;
+            const table = document.querySelector(".earthquake-table");
+            const rows = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip header row
+                const row = rows[i];
+                const dateCell = row.getElementsByTagName("td")[0];
+
+                if (dateCell) {
+                    if (!inputDate) {
+                        row.style.display = ""; // Show all rows if no date specified
+                    } else {
+                        const tableDate = new Date(dateCell.textContent);
+                        if (tableDate.toISOString().slice(0, 10) === inputDate) {
+                            row.style.display = ""; // Show row
+                        } else {
+                            row.style.display = "none"; // Hide row
+                        }
+                    }
+                }
+            }
+        });
+
+        document.getElementById("date_global").addEventListener("change", function() {
+            const inputDate = this.value;
+            const table = document.querySelector(".earthquake-table-global");
+            const rows = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip header row
+                const row = rows[i];
+                const dateCell = row.getElementsByTagName("td")[0];
+
+                if (dateCell) {
+                    if (!inputDate) {
+                        row.style.display = ""; // Show all rows if no date specified
+                    } else {
+                        const tableDate = new Date(dateCell.textContent);
+                        if (tableDate.toISOString().slice(0, 10) === inputDate) {
+                            row.style.display = ""; // Show row
+                        } else {
+                            row.style.display = "none"; // Hide row
+                        }
+                    }
+                }
+            }
+        });
+
+        document.getElementById("magnitude").addEventListener("input", function() {
+            const inputMagnitude = parseFloat(this.value);
+            const table = document.querySelector(".earthquake-table");
+            const rows = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip header row
+                const row = rows[i];
+                const magnitudeCell = row.getElementsByTagName("td")[3];
+
+                if (magnitudeCell) {
+                    const rowMagnitude = parseFloat(magnitudeCell.textContent);
+                    if (isNaN(inputMagnitude) || rowMagnitude >= inputMagnitude) {
+                        row.style.display = ""; // Show row
+                    } else {
+                        row.style.display = "none"; // Hide row
+                    }
+                }
+            }
+        });
+
+        document.getElementById("magnitude_global").addEventListener("input", function() {
+            const inputMagnitude = parseFloat(this.value);
+            const table = document.querySelector(".earthquake-table-global");
+            const rows = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip header row
+                const row = rows[i];
+                const magnitudeCell = row.getElementsByTagName("td")[2];
+
+                if (magnitudeCell) {
+                    const rowMagnitude = parseFloat(magnitudeCell.textContent);
+                    if (isNaN(inputMagnitude) || rowMagnitude >= inputMagnitude) {
+                        row.style.display = ""; // Show row
+                    } else {
+                        row.style.display = "none"; // Hide row
+                    }
+                }
+            }
+        });
+
+        document.getElementById("intensity").addEventListener("change", function() {
+            const inputIntensity = this.value;
+            const table = document.querySelector(".earthquake-table");
+            const rows = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip header row
+                const row = rows[i];
+                const intensityCell = row.getElementsByTagName("td")[4].getElementsByTagName("img")[0];
+
+                if (intensityCell) {
+                    let rowIntensity = intensityCell.alt
+                        .replace('tbp', '')
+                        .replace('強', '+')
+                        .replace('弱', '-');
+                    if (!inputIntensity || rowIntensity === inputIntensity) {
+                        row.style.display = ""; // Show row
+                    } else {
+                        row.style.display = "none"; // Hide row
+                    }
+                }
+            }
+        });
+
+        document.getElementById("tsunami_global").addEventListener("change", function() {
+            const inputTsunami = this.value;
+            const table = document.querySelector(".earthquake-table-global");
+            const rows = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip header row
+                const row = rows[i];
+                const tsunamiCell = row.getElementsByTagName("td")[5];
+
+                if (tsunamiCell) {
+                    const rowTsunami = tsunamiCell.textContent;
+                    if (!inputTsunami || rowTsunami === inputTsunami) {
+                        row.style.display = ""; // Show row
+                    } else {
+                        row.style.display = "none"; // Hide row
+                    }
+                }
+            }
+        });
+
+        function filterTable() {
+            let input, filter, table, tr, td, i, j, txtValue;
+            input = document.getElementById("search");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("tableJP");
+            tr = table.getElementsByTagName("tr");
+
+            // Loop through all table rows, and hide those who don't match the search query
+            for (i = 1; i < tr.length; i++) { // Start from 1 to skip the header row
+                let rowMatches = false;
+                td = tr[i].getElementsByTagName("td");
+                for (j = 0; j < td.length; j++) {
+                    if (td[j]) {
+                        txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        rowMatches = true;
+                        break; // Found a match in this row, no need to check other cells
+                        }
+                    }
+                }
+                if (rowMatches) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+
+        function filterTableGlobal() {
+            let input, filter, table, tr, td, i, j, txtValue;
+            input = document.getElementById("search_global");
+            filter = input.value.toUpperCase();
+            table = document.querySelector(".earthquake-table-global");
+            tr = table.getElementsByTagName("tr");
+
+            // Loop through all table rows, and hide those who don't match the search query
+            for (i = 1; i < tr.length; i++) { // Start from 1 to skip the header row
+                let rowMatches = false;
+                td = tr[i].getElementsByTagName("td");
+                for (j = 0; j < td.length; j++) {
+                    if (td[j]) {
+                        txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        rowMatches = true;
+                        break; // Found a match in this row, no need to check other cells
+                        }
+                    }
+                }
+                if (rowMatches) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+
+        function updateJPEarthquakeTable(jpQuakes) {
+            const tableBody = document.getElementById('insert_jp_quakes');
+            if (!tableBody) return;
+            tableBody.innerHTML = ''; // Clear the existing table rows
+
+            jpQuakes.forEach(quake => {
+                // Support both object form {date, time, location, magnitude, intensity}
+                // and array form [date, time, location, magnitude, intensity]
+                const date = quake && quake.date !== undefined ? quake.date : (Array.isArray(quake) ? quake[0] : '');
+                const time = quake && quake.time !== undefined ? quake.time : (Array.isArray(quake) ? quake[1] : '');
+                const location = quake && quake.location !== undefined ? quake.location : (Array.isArray(quake) ? quake[2] : '');
+                const magnitude = quake && quake.magnitude !== undefined ? quake.magnitude : (Array.isArray(quake) ? quake[3] : '');
+                let intensityRaw = quake && quake.intensity !== undefined ? quake.intensity : (Array.isArray(quake) ? quake[4] : '');
+                intensityRaw = intensityRaw === null || intensityRaw === undefined ? '' : String(intensityRaw);
+
+                // Normalize intensity for filename and alt text
+                const intensityForFile = intensityRaw.replace(/^tbp/i, '');
+                const altText = intensityForFile.replace(/強/g, '+').replace(/弱/g, '-');
+
+                // Use absolute or root-relative path to static files to avoid path issues
+                const imgSrc = `/static/shindo-images/tbp${intensityForFile}.png`;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${date || ''}</td>
+                    <td>${time || ''}</td>
+                    <td>${location || ''}</td>
+                    <td>${magnitude || ''}</td>
+                    <td>
+                        <img src="${imgSrc}"
+                            alt="${altText}">
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function updateMostRecentJPEarthquake(recentJP) {
+            const recentContainer = document.querySelector('.mostrecent_japan');
+            if (recentJP.length > 0) {
+                const quake = recentJP[0];
+                recentContainer.innerHTML = `
+                    <h3>Most Recent Japan Earthquake</h3>
+                    <p>Date (in PST): ${quake.date}</p>
+                    <p>Time: ${quake.time}</p>
+                    <p>Location: ${quake.location}</p>
+                    <p>Magnitude: ${quake.magnitude}</p>
+                    <div class="intensity_spotlight">
+                        <img src="static/shindo-images/tbp${quake.intensity}.png" 
+                            alt="${quake.intensity.replace('tbp', '').replace('強', '+').replace('弱', '-')}">
+                    </div>
+                `;
+            } else {
+                recentContainer.innerHTML = '<p>No recent Japan earthquake data available.</p>';
+            }
+        }
+
+        function refreshJPEarthquakeData() {
+            // Call the /refresh_jp endpoint
+            fetch('/refresh_jp')
+                .then(response => response.json())
+                .then(data => {
+                    // Extract the refreshed Japan earthquake data and the most recent earthquake
+                    const jpQuakes = data.jp_quakes;
+                    const recentJP = data.recent_jp;
+
+                    // Update the Japan earthquake table or map with the refreshed data
+                    updateJPEarthquakeTable(jpQuakes);
+
+                    // Update the most recent Japan earthquake display
+                    updateMostRecentJPEarthquake(recentJP);
+                })
+                .catch(error => {
+                    console.error('Error refreshing Japan earthquake data:', error);
+                });
+        }
+
+        function updateGlobalEarthquakeTable(globalQuakes) {
+            const tableBody = document.getElementById('global-earthquake-table-body');
+            tableBody.innerHTML = ''; // Clear the existing table rows
+
+            globalQuakes.forEach(quake => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${quake.date}</td>
+                    <td>${quake.time}</td>
+                    <td>${quake.magnitude}</td>
+                    <td>${quake.location}</td>
+                    <td>${quake.title}</td>
+                    <td>${quake.tsunami ? 'Yes' : 'No'}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function updateMostRecentGlobalEarthquake(recentGlobal) {
+            const recentContainer = document.getElementById('most-recent-global-earthquake');
+            if (recentGlobal.length > 0) {
+                const quake = recentGlobal[0];
+                recentContainer.innerHTML = `
+                    <p><strong>Date:</strong> ${quake.date}</p>
+                    <p><strong>Time:</strong> ${quake.time}</p>
+                    <p><strong>Magnitude:</strong> ${quake.magnitude}</p>
+                    <p><strong>Location:</strong> ${quake.location}</p>
+                    <p><strong>Tsunami:</strong> ${quake.tsunami ? 'Yes' : 'No'}</p>
+                `;
+            } else {
+                recentContainer.innerHTML = '<p>No recent global earthquake data available.</p>';
+            }
+        }
+
+        function refreshGlobalEarthquakeData() {
+            // Call the /refresh_global endpoint
+            fetch('/refresh_global')
+                .then(response => response.json())
+                .then(data => {
+                    // Extract the refreshed global earthquake data and the most recent earthquake
+                    const globalQuakes = data.global_quakes;
+                    const recentGlobal = data.recent_global;
+
+                    // Update the global earthquake table or map with the refreshed data
+                    updateGlobalEarthquakeTable(globalQuakes);
+
+                    // Update the most recent global earthquake display
+                    updateMostRecentGlobalEarthquake(recentGlobal);
+                })
+                .catch(error => {
+                    console.error('Error refreshing global earthquake data:', error);
+                });
+        }
+
+        function countJPEarthquakes() {
+            fetch('/count_jp_earthquakes')
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('.jp_quake_counts p').innerText = data.count;
+                })
+                .catch(error => console.error('Error fetching JP earthquake counts:', error));
+        }
+
+        function countGlobalEarthquakes() {
+            fetch('/count_global_earthquakes')
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('.global_quake_counts p').innerText = data.count;
+                })
+                .catch(error => console.error('Error fetching Global earthquake counts:', error));
+        }
+
+        function countSignificantJPEarthquakes() {
+            fetch('/count_significant_jp_earthquakes')
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('.jp_quake_sig_counts p').innerText = data.count;
+                })
+                .catch(error => console.error('Error fetching significant JP earthquake counts:', error));
+        }
+
+        function countSignificantGlobalEarthquakes() {
+            fetch('/count_significant_global_earthquakes')
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('.global_quake_sig_counts p').innerText = data.count;
+                })
+                .catch(error => console.error('Error fetching significant Global earthquake counts:', error));
+        }
+
+        // Initial counts
+        countJPEarthquakes();
+        countGlobalEarthquakes();
+        countSignificantJPEarthquakes();
+        countSignificantGlobalEarthquakes();
+    </script>
+</body>
+</html>

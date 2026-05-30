@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YuuBot 1.0 (Beta)</title> 
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav id="navbar">
+        <h1>Yuubot</h1>
+        <hr>
+        <ul>
+            <li class="tablinks" id="defaulttab" onclick="openTab(event, 'home')"><a href="#">Home</a></li>
+            <li class="tablinks" onclick="refreshEarthquakeData()"><a href="#">Refresh Data</a></li>
+        </ul>
+    </nav>
+    <div class="window" id="home">
+        <h2>Recent Japan Earthquakes</h2>
+        <div class="table_fix_head">
+            <table class="earthquake-table" border="1">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>Magnitude</th>
+                        <th>Intensity</th>
+                    </tr>
+                </thead>
+                <tbody id="all-earthquakes">
+                    {% for earthquake in quakes %}
+                    <tr>
+                        <td>{{ earthquake[0] }}</td>
+                        <td>{{ earthquake[1] }}</td>
+                        <td>{{ earthquake[2] }}</td>
+                        <td><img src="{{url_for('static', filename=earthquake[3])}}" alt=""></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p>Note: YuuBot App is under development. Some features are not yet implemented.</p>
+    </div>
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("window");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace("active", "");
+                // document.getElementById()
+            }
+            
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        document.getElementById("defaulttab").click();
+
+        function refreshEarthquakeData() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/refresh", true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    document.querySelector("#all-earthquakes").innerHTML = "";
+                    var quakes = JSON.parse(xhr.responseText);
+                    quakes.forEach(function(earthquake) {
+                        var row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${earthquake[0]}</td>
+                            <td>${earthquake[1]}</td>
+                            <td>${earthquake[2]}</td>
+                            <td><img src="static/${earthquake[3]}" alt=""></td>
+                        `;
+                        document.querySelector("#all-earthquakes").appendChild(row);
+                    });
+                }
+            }
+            xhr.send();
+        }
+    </script>
+</body>
+</html>
