@@ -1,6 +1,6 @@
 # YuuBot Main v.2.1.0 - Setup & Running Instructions
 
-![](https://img.shields.io/badge/version-2.1.0-green) ![](https://img.shields.io/badge/Snowflake-Intelligence-29B5E8?logo=snowflake) ![](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=fff) ![](https://img.shields.io/badge/React-%2320232a.svg?logo=react&logoColor=%2361DAFB)
+![](https://img.shields.io/badge/version-2.1.0-green) ![](https://img.shields.io/badge/Snowflake-29B5E8?logo=snowflake&logoColor=fff) ![](https://img.shields.io/badge/React-%2320232a.svg?logo=react&logoColor=%2361DAFB) ![](https://img.shields.io/badge/Next.js-black?logo=next.js&logoColor=white) ![](https://img.shields.io/badge/Tailwind%20CSS-%2338B2AC.svg?logo=tailwind-css&logoColor=white)
 
 ## Overview
 
