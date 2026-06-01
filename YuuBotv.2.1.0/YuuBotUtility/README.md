@@ -321,6 +321,7 @@ Add the following orchestration instructions:
 5. **"Access denied to trial accounts"**
    - As of Snowflake's policy, trial accounts may have restricted Cortex AI access
    - Consider converting to a paid account for full functionality
+   - Alternatively, create a Cortex Code CLI trial account
 
 ## Architecture
 
